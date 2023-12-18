@@ -1,0 +1,29 @@
+version: "3"
+services:
+  postgres:
+    image: 'postgres:latest'
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres_password
+    
+  redis:
+    image: 'redis:latest'
+    restart: always
+  
+  # START ADDING INVIDIUAL SERVICES
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    volumes:
+      - /app/node_modules
+      - "$PWD/server:/app"
+    
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PGUSER=postgres
+      - PGHOST=postgres
+      - PGDATABASE=postgres
+      - PGPASSWORD=postgres_password
+      - PGPORT=5432
