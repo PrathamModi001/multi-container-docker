@@ -1,0 +1,21 @@
+sudo: required
+services:
+  - docker
+before_install:
+  - docker build -t modi/multi-docker -f ./client/Dockerfile.dev ./client
+script:
+  - docker run -e CI=true modi/multi-docker npm run test
+
+# Build production images
+after_success:
+  - docker build -t modi/multi-client ./client
+  - docker build -t modi/multi-nginx ./nginx
+  - docker build -t modi/multi-server ./server
+  - docker build -t modi/multi-worker ./worker
+  # Log in to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Push the images to docker hub
+  - docker push modi/multi-client
+  - docker push modi/multi-nginx
+  - docker push modi/multi-server
+  - docker push modi/multi-worker

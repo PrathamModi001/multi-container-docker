@@ -1,7 +1,15 @@
-FROM node:16-alpine
-WORKDIR '/app'
-COPY ./package.json ./
+# Build Phase
+FROM node:16-alpine as builder
+WORKDIR "/app"
+COPY package.json .
 RUN npm install
-RUN mkdir -p node_modules/.cache && chmod -R 777 node_modules/.cache
 COPY . .
-CMD ["npm", "run", "start"]
+RUN npm run build
+
+
+# Run Phase
+FROM nginx
+EXPOSE 3000
+# copy the default.conf of local machine to the nginx container 
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/build /usr/share/nginx/html
